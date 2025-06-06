@@ -2,28 +2,45 @@ import React, { useState, useEffect } from 'react';
 
 import Alert from '../comps/DisplayComps/Alert';
 import Card from '../comps/DisplayComps/Card';
-import ParseMap from '../comps/DisplayComps/ParseMap';
+import MapParse from '../comps/DisplayComps/MapParse';
 
 function Dashboard() {
+	// Alerts
+	const [errorAlert, setErrorAlert] = useState(false);
+
 	// States
-	const [dataAPI, setDataAPI] = useState(false);
-	const [map, setMap] = useState('');
+	const [loadedDataAPI, setLoadedDataAPI] = useState(false); // check if the data from the API are loaded
+
+	const [map, setMap] = useState(''); // displayed map
 
 	// Ask map on mount
 	useEffect(() => {
 		fetch('/dashboard')
 			.then((res) => res.json())
 			.then((data) => {
-				setDataAPI(true);
+				setLoadedDataAPI(true);
 				setMap(data.iframe);
+				// if (data.status === 'success') {
+				// 	setLoadedDataAPI(true);
+				// 	setMap(data.iframe);
+				// } else {
+				// 	setErrorAlert(true);
+				// }
 			});
 	}, []);
 
 	// Display when the data has been retrieved
-	if (!dataAPI) {
+	if (!loadedDataAPI) {
 		return (
 			<div className='container pt-5'>
-				<Alert text={'Loading...'} color={'secondary'} />
+				{errorAlert && <Alert text={'Loading...'} color={'secondary'} />}
+
+				{errorAlert && (
+					<Alert
+						text={'An error has occured, please try again later.'}
+						color={'danger'}
+					/>
+				)}
 			</div>
 		);
 	}
@@ -37,7 +54,7 @@ function Dashboard() {
 				</div>
 				<div className='col-md-9'>
 					<Card title={'Map'}>
-						<ParseMap map={map} />
+						<MapParse map={map} />
 					</Card>
 				</div>
 			</div>

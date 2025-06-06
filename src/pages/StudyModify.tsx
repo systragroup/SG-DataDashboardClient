@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,9 +7,11 @@ import Card from '../comps/DisplayComps/Card';
 import InputCoordinates from '../comps/InputsComps/InputCoordinates';
 import InputLongText from '../comps/InputsComps/InputLongText';
 import InputShortText from '../comps/InputsComps/InputShortText';
-import { A } from 'react-router/dist/development/register-BkDIKxVz';
+
+import { ContextRedirectInterval } from '..';
 
 function StudyModify() {
+	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
 	const navigate = useNavigate();
 	const params = useParams();
 
@@ -20,8 +22,9 @@ function StudyModify() {
 	const [errorAlert, setErrorAlert] = useState(false);
 
 	// States
-	const [dataAPI, setDataAPI] = useState(false);
-	const [studyID, setStudyID] = useState(-1);
+	const [loadedDataAPI, setLoadedDataAPI] = useState(false); // check if the data from the API are loaded
+
+	const [studyID, setStudyID] = useState(-1); // data of the study
 	const [studyName, setStudyName] = useState('');
 	const [studyLat, setStudyLat] = useState(0);
 	const [studyLon, setStudyLon] = useState(0);
@@ -29,14 +32,18 @@ function StudyModify() {
 
 	// Get the data of the study
 	useEffect(() => {
-		const id = params.studyID ? params.studyID : '-1';
-		const intID = parseInt(id);
-		setStudyID(intID);
-		fetch(`/study/${intID}`)
+		// Get the ID if it exists
+		const strStudyID =
+			typeof params.studyID === 'string' ? params.studyID : '-1';
+		const intStudyID = parseInt(strStudyID) > 0 ? parseInt(strStudyID) : -1;
+		setStudyID(intStudyID);
+
+		// Data
+		fetch(`/study/${intStudyID}`)
 			.then((res) => res.json())
 			.then((data) => {
 				if (data.status === 'success') {
-					setDataAPI(true);
+					setLoadedDataAPI(true);
 					setStudyName(data.name);
 					setStudyLat(data.lat);
 					setStudyLon(data.lon);
@@ -45,13 +52,13 @@ function StudyModify() {
 					setUnexistingAlert(true);
 					setTimeout(() => {
 						navigate('/studies_manager');
-					}, 3000);
+					}, timeRedirectInterval);
 				}
 			});
 	}, []);
 
 	// Submit the modifications
-	const submitForm = (event: any) => {
+	function submitForm(event: any) {
 		setLoadingAlert(true);
 		event.preventDefault(); // avoid refreshing the page
 		const formData = new FormData(event.target);
@@ -66,18 +73,25 @@ function StudyModify() {
 					setSuccessAlert(true);
 					setTimeout(() => {
 						navigate(`/study/${studyID}`);
-					}, 3000);
+					}, timeRedirectInterval);
 				} else {
 					setErrorAlert(true);
 				}
 			});
-	};
+	}
 
 	// Display when the data has been retrieved from the API
-	if (!dataAPI) {
+	if (!loadedDataAPI) {
 		return (
 			<div className='container pt-5'>
-				<Alert text={'Loading...'} color={'secondary'} />
+				{!unexistingAlert && <Alert text={'Loading...'} color={'secondary'} />}
+
+				{unexistingAlert && (
+					<Alert
+						text={'The study does not exist. You will be redirected.'}
+						color={'warning'}
+					/>
+				)}
 			</div>
 		);
 	}
@@ -85,13 +99,6 @@ function StudyModify() {
 	// Main page
 	return (
 		<div className='container pt-5'>
-			{unexistingAlert && (
-				<Alert
-					text={'The study does not exists. You will be redirected.'}
-					color={'warning'}
-				/>
-			)}
-
 			<form id='studyForm' onSubmit={(event) => submitForm(event)}>
 				<Card title={`Modifications for: ${studyName}`}>
 					<InputShortText

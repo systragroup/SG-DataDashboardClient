@@ -2,6 +2,8 @@ import React from 'react';
 
 interface InputLongTextProps {
 	id: string;
+	onChangeFunc?: (event: any) => void;
+	ref?: any;
 	desc: string;
 	defaultText?: string;
 	required: boolean;
@@ -10,6 +12,8 @@ interface InputLongTextProps {
 
 function InputLongText({
 	id,
+	onChangeFunc,
+	ref,
 	desc,
 	defaultText,
 	required,
@@ -25,6 +29,8 @@ function InputLongText({
 					className='form-control'
 					id={id}
 					name={id}
+					onChange={onChangeFunc}
+					ref={ref}
 					defaultValue={defaultText}
 					cols={50}
 					rows={4}

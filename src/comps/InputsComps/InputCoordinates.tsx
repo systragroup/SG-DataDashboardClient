@@ -2,6 +2,9 @@ import React from 'react';
 
 interface InputCoordinatesProps {
 	id: string;
+	onChangeFunc?: (event: any) => void;
+	refLat?: any;
+	refLon?: any;
 	defaultLat?: number;
 	defaultLon?: number;
 	required: boolean;
@@ -10,6 +13,9 @@ interface InputCoordinatesProps {
 
 function InputCoordinates({
 	id,
+	onChangeFunc,
+	refLat,
+	refLon,
 	defaultLat,
 	defaultLon,
 	required,
@@ -24,6 +30,8 @@ function InputCoordinates({
 					type='number'
 					id={`${id}Lat`}
 					name={`${id}Lat`}
+					onChange={onChangeFunc}
+					ref={refLat}
 					defaultValue={defaultLat}
 					step={'0.000001'}
 					min={'-90'}
@@ -39,6 +47,8 @@ function InputCoordinates({
 					type='number'
 					id={`${id}Lon`}
 					name={`${id}Lon`}
+					onChange={onChangeFunc}
+					ref={refLon}
 					defaultValue={defaultLon}
 					step={'0.000001'}
 					min={'-180'}

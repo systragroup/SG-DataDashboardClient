@@ -1,7 +1,9 @@
 import React from 'react';
 
-interface InputCoordinatesProps {
+interface InputFileProps {
 	id: string;
+	onChangeFunc?: (event: any) => void;
+	ref?: any;
 	desc: string;
 	extensions: string;
 	required: boolean;
@@ -10,11 +12,13 @@ interface InputCoordinatesProps {
 
 function InputFile({
 	id,
+	onChangeFunc,
+	ref,
 	desc,
 	extensions,
 	required,
 	readonly,
-}: InputCoordinatesProps) {
+}: InputFileProps) {
 	return (
 		<div className='row mb-3'>
 			<div className='col-md-12'>
@@ -27,6 +31,8 @@ function InputFile({
 					accept={extensions}
 					id={id}
 					name={id}
+					onChange={onChangeFunc}
+					ref={ref}
 					required={required}
 					readOnly={readonly}
 				/>

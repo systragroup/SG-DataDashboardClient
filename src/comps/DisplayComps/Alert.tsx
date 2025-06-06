@@ -16,8 +16,12 @@ interface AlertProps {
 
 function Alert({ text, color }: AlertProps) {
 	return (
-		<div className={`alert alert-${color} mb-3`} role='alert'>
-			{text}
+		<div className='row'>
+			<div className='col-md-12'>
+				<div className={`alert alert-${color} mb-3`} role='alert'>
+					{text}
+				</div>
+			</div>
 		</div>
 	);
 }

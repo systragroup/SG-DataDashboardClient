@@ -2,6 +2,8 @@ import React from 'react';
 
 interface InputShortTextProps {
 	id: string;
+	onChangeFunc?: (event: any) => void;
+	ref?: any;
 	desc: string;
 	defaultText?: string;
 	required: boolean;
@@ -10,6 +12,8 @@ interface InputShortTextProps {
 
 function InputShortText({
 	id,
+	onChangeFunc,
+	ref,
 	desc,
 	defaultText,
 	required,
@@ -26,6 +30,8 @@ function InputShortText({
 					type='text'
 					id={id}
 					name={id}
+					onChange={onChangeFunc}
+					ref={ref}
 					defaultValue={defaultText}
 					required={required}
 					readOnly={readonly}

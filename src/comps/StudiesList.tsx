@@ -1,18 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router';
 
-interface CardProps {
-	title: string;
-	desc: string;
-	list: { id: number; name: string; visibility: boolean }[];
-	defaultmessage: string;
-	ref: string;
+interface StudyElementProps {
+	id: number;
+	name: string;
+	checked: boolean;
+	dest: string;
 }
 
-function StudyElement(id: number, name: string, checked: boolean, ref: string) {
+function StudyElement({ id, name, checked, dest }: StudyElementProps) {
 	return (
 		<li className='list-group-item' key={id}>
-			<Link to={ref} style={{ textDecoration: 'none', color: 'black' }}>
+			<Link to={dest} style={{ textDecoration: 'none', color: 'black' }}>
 				<div className='row m-1'>
 					<div className='d-flex justify-content-between'>
 						<div className='col-md-2'>{id}</div>
@@ -31,7 +30,21 @@ function StudyElement(id: number, name: string, checked: boolean, ref: string) {
 	);
 }
 
-function StudiesList({ title, desc, list, defaultmessage, ref }: CardProps) {
+interface StudiesListProps {
+	title: string;
+	desc: string;
+	list: { id: number; name: string; visibility: boolean }[];
+	defaultmessage: string;
+	dest: string;
+}
+
+function StudiesList({
+	title,
+	desc,
+	list,
+	defaultmessage,
+	dest,
+}: StudiesListProps) {
 	return (
 		<div className='card mb-3'>
 			<div className='card-header'>
@@ -49,9 +62,14 @@ function StudiesList({ title, desc, list, defaultmessage, ref }: CardProps) {
 				{list.length === 0 && (
 					<li className='list-group-item'>{defaultmessage}</li>
 				)}
-				{list.map((el) =>
-					StudyElement(el.id, el.name, el.visibility, `${ref}/${el.id}`)
-				)}
+				{list.map((el) => (
+					<StudyElement
+						id={el.id}
+						name={el.name}
+						checked={el.visibility}
+						dest={`${dest}/${el.id}`}
+					/>
+				))}
 			</ul>
 		</div>
 	);

@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 interface ButtonFunctionProps {
 	text: string;
-	onClickFunc: () => void;
+	onClickFunc: (event: any) => void;
 	color:
 		| 'primary'
 		| 'secondary'

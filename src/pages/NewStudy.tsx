@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Alert from '../comps/DisplayComps/Alert';
@@ -8,7 +8,10 @@ import InputFile from '../comps/InputsComps/InputFile';
 import InputLongText from '../comps/InputsComps/InputLongText';
 import InputShortText from '../comps/InputsComps/InputShortText';
 
+import { ContextRedirectInterval } from '..';
+
 function NewStudy() {
+	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
 	const navigate = useNavigate();
 
 	// Alerts
@@ -17,7 +20,7 @@ function NewStudy() {
 	const [errorAlert, setErrorAlert] = useState(false);
 
 	// Submit the form
-	const submitForm = (event: any) => {
+	function submitForm(event: any) {
 		setLoadingAlert(true);
 		event.preventDefault(); // avoid refreshing the page
 		const formData = new FormData(event.target);
@@ -32,12 +35,12 @@ function NewStudy() {
 					setSuccessAlert(true);
 					setTimeout(() => {
 						navigate(`/study/${data.id}`);
-					}, 3000);
+					}, timeRedirectInterval);
 				} else {
 					setErrorAlert(true);
 				}
 			});
-	};
+	}
 
 	// Main page
 	return (
