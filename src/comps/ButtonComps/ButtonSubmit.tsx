@@ -1,6 +1,5 @@
-interface ButtonFunctionProps {
+interface ButtonSubmitProps {
 	text: string;
-	onClickFunc: (event: any) => void;
 	color:
 		| 'primary'
 		| 'secondary'
@@ -14,19 +13,14 @@ interface ButtonFunctionProps {
 	wide?: boolean;
 }
 
-function ButtonFunction({
-	text,
-	onClickFunc,
-	color,
-	wide = false,
-}: ButtonFunctionProps) {
+function ButtonSubmit({ text, color, wide = false }: ButtonSubmitProps) {
 	// Wide button
 	if (wide) {
 		return (
 			<div className='row mb-3'>
 				<div className='col-mb-12'>
 					<div className='row mx-1'>
-						<button className={`btn btn-${color}`} onClick={onClickFunc}>
+						<button className={`btn btn-${color}`} type='submit'>
 							{text}
 						</button>
 					</div>
@@ -39,7 +33,7 @@ function ButtonFunction({
 		return (
 			<div className='row mb-3'>
 				<div className='col-mb-12'>
-					<button className={`btn btn-${color}`} onClick={onClickFunc}>
+					<button className={`btn btn-${color}`} type='submit'>
 						{text}
 					</button>
 				</div>
@@ -48,4 +42,4 @@ function ButtonFunction({
 	}
 }
 
-export default ButtonFunction;
+export default ButtonSubmit;

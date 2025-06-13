@@ -1,13 +1,13 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { useNavigate } from 'react-router';
-
-import Alert from '../comps/DisplayComps/Alert';
 
 import { ContextRedirectInterval } from '..';
 
-function Error404Page() {
-	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
+import Alert from '../comps/DisplayComps/Alert';
 
+function Error404Page() {
+	// Redirect to the main page
+	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
 	const navigate = useNavigate();
 	setTimeout(() => {
 		navigate('/');
@@ -15,6 +15,7 @@ function Error404Page() {
 
 	return (
 		<div className='container pt-5'>
+			{/* Error 404 alert */}
 			<Alert
 				text={
 					'It seems that the page you are seeking does not exists. You will be redirected.'

@@ -1,22 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { ContextRedirectInterval } from '..';
 
 import Alert from '../comps/DisplayComps/Alert';
 import ButtonLink from '../comps/ButtonComps/ButtonLink';
 import Card from '../comps/DisplayComps/Card';
 import MapParse from '../comps/DisplayComps/MapParse';
-import StudiesList from '../comps/StudiesList';
+import StudiesList from '../comps/ListComps/StudiesList';
 
 function StudiesManager() {
-	// Alerts
-	const [errorAlert, setErrorAlert] = useState(false);
+	const navigate = useNavigate();
 
-	// States
+	// Alert states
+	const [errorAlert, setErrorAlert] = useState(false); // error at launch
+
+	// Step states
 	const [loadedDataAPI, setLoadedDataAPI] = useState(false); // check if the data from the API are loaded
 
+	// Variable states
 	const [map, setMap] = useState(''); // displayed map
 	const [studies, setStudies] = useState([
 		{ id: 0, name: 'Loading...', visibility: false },
 	]); // list of the studies to display
+
+	// Redirect when unexisting or error
+	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
+	useEffect(() => {
+		if (errorAlert) {
+			setTimeout(() => {
+				navigate('/');
+			}, timeRedirectInterval);
+		}
+	}, [errorAlert]);
 
 	// Get the map
 	useEffect(() => {
@@ -24,9 +40,9 @@ function StudiesManager() {
 			.then((res) => res.json())
 			.then((data) => {
 				if (data.status === 'success') {
-					setLoadedDataAPI(true);
 					setMap(data.iframe);
 					setStudies(data.studies);
+					setLoadedDataAPI(true);
 				} else {
 					setErrorAlert(true);
 				}
@@ -37,8 +53,10 @@ function StudiesManager() {
 	if (!loadedDataAPI) {
 		return (
 			<div className='container pt-5'>
+				{/* Loadint alert */}
 				{errorAlert && <Alert text={'Loading...'} color={'secondary'} />}
 
+				{/* Error alert */}
 				{errorAlert && (
 					<Alert
 						text={'An error has occured, please try again later.'}
@@ -52,15 +70,9 @@ function StudiesManager() {
 	// Main page
 	return (
 		<div className='container-fluid pt-5'>
-			{errorAlert && (
-				<Alert
-					text={'An error has occured, please try again later.'}
-					color={'danger'}
-				/>
-			)}
-
 			<div className='row'>
 				<div className='col-md-3'>
+					{/* List of the studies */}
 					<StudiesList
 						title={'Studies'}
 						desc={'Study visible'}
@@ -69,6 +81,7 @@ function StudiesManager() {
 						dest={'/study'}
 					/>
 					<div className='mb-3'>
+						{/* Create a study button */}
 						<ButtonLink
 							text={'Add a study'}
 							ref={'/studies_manager/new'}
@@ -76,6 +89,8 @@ function StudiesManager() {
 						/>
 					</div>
 				</div>
+
+				{/* Map */}
 				<div className='col-md-9'>
 					<Card title={'Map'}>
 						<MapParse map={map} />

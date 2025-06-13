@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface InputSelectorProps {
 	id: string;
 	onChangeFunc?: (event: any) => void;
@@ -22,11 +20,15 @@ function InputSelector({
 	return (
 		<div className='row mb-3'>
 			<div className='col-md-12'>
+				{/* Label */}
 				<label htmlFor={id}>
 					{desc} {required && '*'}
 				</label>
+
+				{/* Selector */}
 				<select
 					className='form-control'
+					style={{ borderColor: 'rgb(200, 200, 200)' }}
 					id={id}
 					name={id}
 					onChange={onChangeFunc}
@@ -34,6 +36,7 @@ function InputSelector({
 					defaultValue={defaultValue}
 					required={required}
 				>
+					{/* Values */}
 					{values.map((el) => (
 						<option key={el.value} value={el.value}>
 							{el.text}

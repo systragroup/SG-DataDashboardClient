@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router';
 
 interface StudyElementProps {
@@ -46,31 +45,41 @@ function StudiesList({
 	dest,
 }: StudiesListProps) {
 	return (
-		<div className='card mb-3'>
-			<div className='card-header'>
-				<div className='row m-1'>
-					<div className='d-flex justify-content-between'>
-						<div className='col-md-2'>#</div>
-						<div className='col-md-7'>{title}</div>
-						<div className='col-md-3'>
-							<div className='d-flex justify-content-center'>{desc}</div>
+		<div className='row mb-3'>
+			<div className='col-md-12'>
+				<div className='card' style={{ borderColor: 'rgb(200, 200, 200)' }}>
+					{/* Header */}
+					<div
+						className='card-header'
+						style={{ backgroundColor: 'rgb(225, 225, 225)' }}
+					>
+						<div className='row m-1'>
+							<div className='d-flex justify-content-between'>
+								<div className='col-md-2'>#</div>
+								<div className='col-md-7'>{title}</div>
+								<div className='col-md-3'>
+									<div className='d-flex justify-content-center'>{desc}</div>
+								</div>
+							</div>
 						</div>
 					</div>
+
+					{/* List of the studies */}
+					<ul className='list-group list-group-flush'>
+						{list.length === 0 && (
+							<li className='list-group-item'>{defaultmessage}</li>
+						)}
+						{list.map((el) => (
+							<StudyElement
+								id={el.id}
+								name={el.name}
+								checked={el.visibility}
+								dest={`${dest}/${el.id}`}
+							/>
+						))}
+					</ul>
 				</div>
 			</div>
-			<ul className='list-group list-group-flush'>
-				{list.length === 0 && (
-					<li className='list-group-item'>{defaultmessage}</li>
-				)}
-				{list.map((el) => (
-					<StudyElement
-						id={el.id}
-						name={el.name}
-						checked={el.visibility}
-						dest={`${dest}/${el.id}`}
-					/>
-				))}
-			</ul>
 		</div>
 	);
 }

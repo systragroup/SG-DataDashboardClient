@@ -1,4 +1,3 @@
-import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 
 import ButtonFunction from '../ButtonComps/ButtonFunction';
@@ -20,10 +19,15 @@ function ConfirmModal({
 }: ConfirmModalProps) {
 	return (
 		<Modal show={show} onHide={cancelFunc}>
+			{/* Header */}
 			<Modal.Header closeButton>
 				<Modal.Title>{title}</Modal.Title>
 			</Modal.Header>
+
+			{/* Body */}
 			<Modal.Body>{text}</Modal.Body>
+
+			{/* Buttons */}
 			<Modal.Footer>
 				<ButtonFunction
 					text={'Cancel'}

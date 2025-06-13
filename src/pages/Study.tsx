@@ -1,33 +1,34 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
+
+import { ContextRedirectInterval } from '..';
 
 import Alert from '../comps/DisplayComps/Alert';
 import ButtonFunction from '../comps/ButtonComps/ButtonFunction';
 import ButtonLink from '../comps/ButtonComps/ButtonLink';
 import Card from '../comps/DisplayComps/Card';
-import FilesList from '../comps/FilesList';
 import ConfirmModal from '../comps/DisplayComps/ConfirmModal';
+import FilesList from '../comps/ListComps/FilesList';
 import InputCoordinates from '../comps/InputsComps/InputCoordinates';
 import InputLongText from '../comps/InputsComps/InputLongText';
 import MapParse from '../comps/DisplayComps/MapParse';
 
-import { ContextRedirectInterval } from '..';
-
 function Study() {
-	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
 	const navigate = useNavigate();
 	const params = useParams();
 
-	// Alerts
-	const [unexistingAlert, setUnexistingAlert] = useState(false);
-	const [visibilitySuccessAlert, setVisibilitySuccessAlert] = useState(false);
-	const [visibilityErrorAlert, setVisibilityErrorAlert] = useState(false);
-	const [deletedAlert, setDeletedAlert] = useState(false);
+	// Alert states
+	const [unexistingAlert, setUnexistingAlert] = useState(false); // unexisting study
+	const [errorAlert, setErrorAlert] = useState(false); // error at launch
+	const [visibilitySuccessAlert, setVisibilitySuccessAlert] = useState(false); // change of the visibility successful
+	const [visibilityErrorAlert, setVisibilityErrorAlert] = useState(false); // cahnge of the visibility unsuccessful
+	const [deletedAlert, setDeletedAlert] = useState(false); // study deleted
 
-	// States
+	// Step states
 	const [loadedDataAPI, setLoadedDataAPI] = useState(false); // check if the data from the API are loaded
 
+	// Variable states
 	const [studyID, setStudyID] = useState(-1); // data of the study
 	const [studyName, setStudyName] = useState('');
 	const [studyLat, setStudyLat] = useState(0);
@@ -38,6 +39,16 @@ function Study() {
 	const [map, setMap] = useState(''); // displayed map
 	const [types, setTypes] = useState([]); // array with the types
 	const [files, setFiles] = useState({ '': { 0: '' } }); // object with key types value object (key id value name of the files)
+
+	// Redirect when unexisting or error
+	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
+	useEffect(() => {
+		if (unexistingAlert || errorAlert) {
+			setTimeout(() => {
+				navigate('/studies_manager');
+			}, timeRedirectInterval);
+		}
+	}, [unexistingAlert, errorAlert]);
 
 	// Get the data of the study
 	useEffect(() => {
@@ -50,48 +61,58 @@ function Study() {
 		// Data
 		fetch(`/study/${intStudyID}`)
 			.then((res) => res.json())
-			.then((data) => {
-				if (data.status === 'success') {
-					setStudyName(data.name);
-					setStudyLat(data.lat);
-					setStudyLon(data.lon);
-					setStudyDesc(data.desc);
-					setStudyVisibility(data.visibility);
-
+			.then((data1) => {
+				if (data1.status === 'success') {
 					// Map
 					fetch(`/study/${intStudyID}/map`)
 						.then((res) => res.json())
 						.then((data2) => {
 							if (data2.status === 'success') {
-								setMap(data2.iframe);
-
 								// List of files
 								fetch(`/study/${intStudyID}/files`)
 									.then((res) => res.json())
 									.then((data3) => {
 										if (data3.status === 'success') {
-											setLoadedDataAPI(true);
+											// Set the data
+											setStudyName(data1.name);
+											setStudyLat(data1.lat);
+											setStudyLon(data1.lon);
+											setStudyDesc(data1.desc);
+											setStudyVisibility(data1.visibility);
+											setMap(data2.iframe);
 											setTypes(data3.types);
 											setFiles(data3.files);
-										} else {
+
+											// Display the page
+											setLoadedDataAPI(true);
+
+											// Unexisting alert
+										} else if (data3.status === 'unexisting') {
 											setUnexistingAlert(true);
-											setTimeout(() => {
-												navigate('/studies_manager');
-											}, timeRedirectInterval);
+
+											// Error alert
+										} else {
+											setErrorAlert(true);
 										}
 									});
-							} else {
+
+								// Unexisting alert
+							} else if (data2.status === 'unexisting') {
 								setUnexistingAlert(true);
-								setTimeout(() => {
-									navigate('/studies_manager');
-								}, timeRedirectInterval);
+
+								// Error alert
+							} else {
+								setErrorAlert(true);
 							}
 						});
-				} else {
+
+					// Unexisting alert
+				} else if (data1.status === 'unexisting') {
 					setUnexistingAlert(true);
-					setTimeout(() => {
-						navigate('/studies_manager');
-					}, timeRedirectInterval);
+
+					// Error alert
+				} else {
+					setErrorAlert(true);
 				}
 			});
 	}, []);
@@ -102,17 +123,25 @@ function Study() {
 		fetch(`/study/${studyID}/visibility`, { method: 'POST' })
 			.then((res) => res.json())
 			.then((data) => {
+				// Close the modal
+				setModalVisibility(false);
+
+				// Success
 				if (data.status === 'success') {
-					setModalVisibility(false);
-					setVisibilitySuccessAlert(true);
 					setStudyVisibility(data.visibility);
+					setVisibilitySuccessAlert(true);
 					setTimeout(() => {
 						setVisibilitySuccessAlert(false);
 					}, timeRedirectInterval);
+
+					// Unexisting alert
+				} else if (data.status === 'unexisting') {
+					setUnexistingAlert(true);
+
+					// Error alert
 				} else {
-					setModalVisibility(false);
-					setVisibilityErrorAlert(true);
 					setStudyVisibility(data.visibility);
+					setVisibilityErrorAlert(true);
 					setTimeout(() => {
 						setVisibilityErrorAlert(false);
 					}, timeRedirectInterval);
@@ -126,12 +155,19 @@ function Study() {
 		fetch(`/study/${studyID}/delete`, { method: 'POST' })
 			.then((res) => res.json())
 			.then((data) => {
+				// Close the modal
+				setModalDelete(false);
+
+				// Success
 				if (data.status === 'success') {
-					setModalDelete(false);
 					setDeletedAlert(true);
 					setTimeout(() => {
 						navigate('/studies_manager');
 					}, timeRedirectInterval);
+
+					// Unexisting alert
+				} else if (data.status === 'unexisting') {
+					setUnexistingAlert(true);
 				}
 			});
 	}
@@ -140,12 +176,24 @@ function Study() {
 	if (!loadedDataAPI) {
 		return (
 			<div className='container pt-5'>
-				{!unexistingAlert && <Alert text={'Loading...'} color={'secondary'} />}
+				{/* Loading alert */}
+				{!unexistingAlert && !errorAlert && (
+					<Alert text={'Loading...'} color={'secondary'} />
+				)}
 
+				{/* Unexisting study alert */}
 				{unexistingAlert && (
 					<Alert
 						text={'The study does not exist. You will be redirected.'}
 						color={'warning'}
+					/>
+				)}
+
+				{/* Error alert */}
+				{errorAlert && (
+					<Alert
+						text={'An error has occured. Please try again later.'}
+						color={'danger'}
 					/>
 				)}
 			</div>
@@ -155,6 +203,7 @@ function Study() {
 	// Main page
 	return (
 		<>
+			{/* Change visibility modal */}
 			<ConfirmModal
 				show={modalVisibility}
 				title={studyVisibility ? 'Make private' : 'Make public'}
@@ -169,6 +218,7 @@ function Study() {
 				confirmFunc={toggleVisibility}
 			/>
 
+			{/* Delete the study modal */}
 			<ConfirmModal
 				show={modalDelete}
 				title={'Delete the study'}
@@ -180,6 +230,15 @@ function Study() {
 			/>
 
 			<div className='container pt-5'>
+				{/* Unexisting study alert */}
+				{unexistingAlert && (
+					<Alert
+						text={'The study does not exist. You will be redirected.'}
+						color={'warning'}
+					/>
+				)}
+
+				{/* Change of visibility successful alert */}
 				{visibilitySuccessAlert && (
 					<Alert
 						text={'The visibility of the study has changed successfuly.'}
@@ -187,6 +246,7 @@ function Study() {
 					/>
 				)}
 
+				{/* Change of visibility unsuccessful alert */}
 				{visibilityErrorAlert && (
 					<Alert
 						text={
@@ -196,17 +256,28 @@ function Study() {
 					/>
 				)}
 
+				{/* Deletion of the study alert */}
 				{deletedAlert && (
 					<Alert
 						text={
 							'The study has been deleted successfuly. You will be redirected.'
 						}
-						color={'danger'}
+						color={'info'}
 					/>
 				)}
 
+				{/* Button link to the studies manager*/}
+				<ButtonLink
+					text={'← Go back to the studies manager'}
+					ref={`/studies_manager`}
+					color={'secondary'}
+				/>
+
+				{/* Main content */}
 				<Card title={studyName}>
-					<div className='row mb-3'>
+					{/* Buttons */}
+					<div className='row'>
+						{/* Add a file */}
 						<div className='col-md-3'>
 							<ButtonLink
 								text={'Add a file'}
@@ -215,6 +286,8 @@ function Study() {
 								wide={true}
 							/>
 						</div>
+
+						{/* Change visibility */}
 						<div className='col-md-3'>
 							{studyVisibility ? (
 								<ButtonFunction
@@ -236,6 +309,8 @@ function Study() {
 								/>
 							)}
 						</div>
+
+						{/* Modify the study */}
 						<div className='col-md-3'>
 							<ButtonLink
 								text={'Modify the study'}
@@ -244,6 +319,8 @@ function Study() {
 								wide={true}
 							/>
 						</div>
+
+						{/* Delete the study */}
 						<div className='col-md-3'>
 							<ButtonFunction
 								text={'Delete the study'}
@@ -256,6 +333,7 @@ function Study() {
 						</div>
 					</div>
 
+					{/* Description */}
 					<InputLongText
 						id={'studyDesc'}
 						desc={'Description of the study'}
@@ -264,6 +342,7 @@ function Study() {
 						readonly={true}
 					/>
 
+					{/* Coordinates */}
 					<InputCoordinates
 						id={'study'}
 						defaultLat={studyLat}
@@ -272,8 +351,10 @@ function Study() {
 						readonly={true}
 					/>
 
+					{/* Map */}
 					<MapParse map={map} />
 
+					{/* Files */}
 					{types.map((type) => (
 						<FilesList
 							title={`Files of type ${type}`}

@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface InputShortTextProps {
 	id: string;
 	onChangeFunc?: (event: any) => void;
@@ -22,11 +20,15 @@ function InputShortText({
 	return (
 		<div className='row mb-3'>
 			<div className='col-md-12'>
+				{/* Label */}
 				<label htmlFor={id}>
 					{desc} {required && '*'}
 				</label>
+
+				{/* Text input */}
 				<input
 					className='form-control'
+					style={{ borderColor: 'rgb(200, 200, 200)' }}
 					type='text'
 					id={id}
 					name={id}

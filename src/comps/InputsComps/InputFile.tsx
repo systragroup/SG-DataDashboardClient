@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface InputFileProps {
 	id: string;
 	onChangeFunc?: (event: any) => void;
@@ -22,11 +20,15 @@ function InputFile({
 	return (
 		<div className='row mb-3'>
 			<div className='col-md-12'>
+				{/* Label */}
 				<label htmlFor={id}>
 					{desc} {`(${extensions})`} {required && '*'}
 				</label>
+
+				{/* File selector */}
 				<input
 					className='form-control'
+					style={{ borderColor: 'rgb(200, 200, 200)' }}
 					type='file'
 					accept={extensions}
 					id={id}

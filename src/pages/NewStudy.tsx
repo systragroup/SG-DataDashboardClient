@@ -1,23 +1,34 @@
-import React, { useState, useRef, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { ContextRedirectInterval } from '..';
+
 import Alert from '../comps/DisplayComps/Alert';
+import ButtonLink from '../comps/ButtonComps/ButtonLink';
+import ButtonSubmit from '../comps/ButtonComps/ButtonSubmit';
 import Card from '../comps/DisplayComps/Card';
 import InputCoordinates from '../comps/InputsComps/InputCoordinates';
 import InputFile from '../comps/InputsComps/InputFile';
 import InputLongText from '../comps/InputsComps/InputLongText';
 import InputShortText from '../comps/InputsComps/InputShortText';
 
-import { ContextRedirectInterval } from '..';
-
 function NewStudy() {
-	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
 	const navigate = useNavigate();
 
-	// Alerts
-	const [loadingAlert, setLoadingAlert] = useState(false);
-	const [successAlert, setSuccessAlert] = useState(false);
-	const [errorAlert, setErrorAlert] = useState(false);
+	// Alert states
+	const [loadingAlert, setLoadingAlert] = useState(false); // loading after request of the creation
+	const [successAlert, setSuccessAlert] = useState(false); // success of the creation
+	const [errorAlert, setErrorAlert] = useState(false); // error of the creation
+
+	// Redirect when unexisting or error
+	const timeRedirectInterval = useContext(ContextRedirectInterval); // time before redirect
+	useEffect(() => {
+		if (errorAlert) {
+			setTimeout(() => {
+				navigate('/studies_manager');
+			}, timeRedirectInterval);
+		}
+	}, [errorAlert]);
 
 	// Submit the form
 	function submitForm(event: any) {
@@ -44,54 +55,73 @@ function NewStudy() {
 
 	// Main page
 	return (
-		<div className='container pt-5'>
-			<form id='studyForm' onSubmit={(event) => submitForm(event)}>
-				<Card title={'Study information'}>
-					<InputShortText
-						id={'studyName'}
-						desc={'Name of the study'}
-						required={true}
-						readonly={false}
-					/>
-					<InputLongText
-						id={'studyDesc'}
-						desc={'Description'}
-						required={false}
-						readonly={false}
-					/>
-					<InputCoordinates id={'study'} required={true} readonly={false} />
-					<InputFile
-						id={'studyOutline'}
-						desc={'Outline file'}
-						extensions={'.zip'}
-						required={true}
-						readonly={false}
-					/>
-				</Card>
+		<>
+			<div className='container pt-5'>
+				{/* Button link to the studies manager */}
+				<ButtonLink
+					text={'← Go back to the studies manager'}
+					ref={'/studies_manager'}
+					color={'secondary'}
+				/>
 
-				{loadingAlert && <Alert text={'Loading...'} color={'primary'} />}
+				{/* Main content */}
+				<form id='studyForm' onSubmit={(event) => submitForm(event)}>
+					<Card title={'Study information'}>
+						{/* Name of the study */}
+						<InputShortText
+							id={'studyName'}
+							desc={'Name of the study'}
+							required={true}
+							readonly={false}
+						/>
 
-				{successAlert && (
-					<Alert
-						text={
-							'The study has been created succesfully. You will be redirected.'
-						}
-						color={'success'}
-					/>
-				)}
+						{/* Description */}
+						<InputLongText
+							id={'studyDesc'}
+							desc={'Description'}
+							required={false}
+							readonly={false}
+						/>
 
-				{errorAlert && (
-					<Alert
-						text={'An error has occured, please try again later.'}
-						color={'danger'}
-					/>
-				)}
+						{/* Coordinates */}
+						<InputCoordinates id={'study'} required={true} readonly={false} />
 
-				<button className='btn btn-primary' type='submit'>
-					Create the study
-				</button>
-			</form>
-		</div>
+						{/* Outline of the study area */}
+						<InputFile
+							id={'studyOutline'}
+							desc={'Shapefile of the outline of the study area'}
+							extensions={'.zip'}
+							required={true}
+							readonly={false}
+						/>
+					</Card>
+
+					{/* Submit button */}
+					<ButtonSubmit text={'Create the study'} color={'primary'} />
+
+					{/* Loading alert after requets of creation of the study */}
+					{loadingAlert && <Alert text={'Loading...'} color={'primary'} />}
+
+					{/* Success alert */}
+					{successAlert && (
+						<Alert
+							text={
+								'The study has been created succesfully. You will be redirected.'
+							}
+							color={'success'}
+						/>
+					)}
+
+					{/* Error alert */}
+					{errorAlert && (
+						<Alert
+							text={'An error has occured, please try again later.'}
+							color={'danger'}
+						/>
+					)}
+				</form>
+			</div>
+		</>
 	);
 }
 
